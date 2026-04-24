@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DLQ #{{ row.id }}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; background: #f9fafb; }
+    h1 { margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+    .meta { font-size: 13px; color: #374151; margin-bottom: 20px; background: white; border-radius: 8px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+    .meta-row { display: flex; padding: 4px 0; border-bottom: 1px solid #f3f4f6; }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-label { width: 160px; flex-shrink: 0; color: #9ca3af; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding-top: 1px; }
+    .meta-val { font-family: ui-monospace, monospace; font-size: 13px; }
+
+    .card { background: white; border-radius: 8px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.07); margin-bottom: 16px; }
+    .card-title { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; margin-bottom: 10px; }
+
+    textarea { width: 100%; min-height: 280px; font-family: ui-monospace, monospace; font-size: 13px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; resize: vertical; box-sizing: border-box; }
+    textarea:focus { outline: none; border-color: #2563eb; }
+
+    .actions { display: flex; gap: 8px; margin-top: 10px; }
+    button { padding: 8px 16px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: white; }
+    button:hover { background: #f9fafb; }
+    button.primary { background: #2563eb; color: white; border-color: #2563eb; }
+    button.primary:hover { background: #1d4ed8; }
+    button.danger  { background: #dc2626; color: white; border-color: #dc2626; }
+    button.danger:hover  { background: #b91c1c; }
+
+    .err-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; color: #b91c1c; font-family: ui-monospace, monospace; font-size: 13px; margin-bottom: 16px; }
+
+    .badge { padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge.pending  { background: #fef3c7; color: #92400e; }
+    .badge.replayed { background: #dbeafe; color: #1e40af; }
+    .badge.resolved { background: #dcfce7; color: #166534; }
+
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back { font-size: 13px; margin-bottom: 16px; display: block; }
+  </style>
+</head>
+<body>
+  <a class="back" href="/">← back to list</a>
+
+  <h1>
+    DLQ message #{{ row.id }}
+    <span class="badge {{ row.status }}">{{ row.status }}</span>
+  </h1>
+
+  <div class="meta">
+    <div class="meta-row"><div class="meta-label">received_at</div>      <div class="meta-val">{{ row.received_at }}</div></div>
+    <div class="meta-row"><div class="meta-label">source_topic</div>     <div class="meta-val">{{ row.source_topic }}</div></div>
+    <div class="meta-row"><div class="meta-label">partition</div>         <div class="meta-val">{{ row.source_partition }}</div></div>
+    <div class="meta-row"><div class="meta-label">offset</div>            <div class="meta-val">{{ row.source_offset }}</div></div>
+    <div class="meta-row"><div class="meta-label">message key</div>       <div class="meta-val">{{ row.message_key }}</div></div>
+    <div class="meta-row"><div class="meta-label">attempts</div>          <div class="meta-val">{{ row.attempts }}</div></div>
+    <div class="meta-row"><div class="meta-label">replayed_at</div>       <div class="meta-val">{{ row.replayed_at or '—' }}</div></div>
+  </div>
+
+  {% if row.error_message %}
+    <div class="err-box">
+      <strong>{{ row.error_type }}</strong> — {{ row.error_message }}
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-title">Payload (editable — will be replayed as-is)</div>
+    <form method="post" action="/messages/{{ row.id }}/replay">
+      <textarea name="edited_payload">{{ row.payload }}</textarea>
+      <div class="actions">
+        <button class="primary" type="submit">↺ Replay to raw-events</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="actions">
+    <form method="post" action="/messages/{{ row.id }}/resolve">
+      <button type="submit">✓ Mark as resolved</button>
+    </form>
+    <form method="post" action="/messages/{{ row.id }}/delete">
+      <button class="danger" type="submit">✕ Delete</button>
+    </form>
+  </div>
+</body>
+</html>

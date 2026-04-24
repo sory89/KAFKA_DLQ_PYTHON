@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DLQ Review</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; background: #f9fafb; }
+    h1 { margin-bottom: 4px; }
+    .sub { color: #666; margin-bottom: 16px; font-size: 14px; }
+    .pills { margin: 12px 0; }
+    .pill { display: inline-block; padding: 4px 12px; margin-right: 6px; border-radius: 999px; background: #e5e7eb; color: #374151; text-decoration: none; font-size: 13px; }
+    .pill.active { background: #2563eb; color: white; }
+
+    table { border-collapse: collapse; width: 100%; font-size: 14px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+    th, td { border-bottom: 1px solid #f0f0f0; padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: #fafafa; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .err { color: #b91c1c; font-family: ui-monospace, monospace; font-size: 12px; }
+    .key { font-family: ui-monospace, monospace; font-size: 12px; }
+
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge.pending  { background: #fef3c7; color: #92400e; }
+    .badge.replayed { background: #dbeafe; color: #1e40af; }
+    .badge.resolved { background: #dcfce7; color: #166534; }
+
+    .empty { color: #9ca3af; padding: 40px; text-align: center; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Dead Letter Queue</h1>
+  <div class="sub">
+    Total: <strong>{{ counts.total }}</strong> —
+    Pending: <strong>{{ counts.pending }}</strong> —
+    Replayed: <strong>{{ counts.replayed }}</strong> —
+    Resolved: <strong>{{ counts.resolved }}</strong>
+  </div>
+
+  <div class="pills">
+    <a class="pill {% if status_filter == 'all' %}active{% endif %}"      href="/">All</a>
+    <a class="pill {% if status_filter == 'pending' %}active{% endif %}"  href="/?status=pending">Pending</a>
+    <a class="pill {% if status_filter == 'replayed' %}active{% endif %}" href="/?status=replayed">Replayed</a>
+    <a class="pill {% if status_filter == 'resolved' %}active{% endif %}" href="/?status=resolved">Resolved</a>
+  </div>
+
+  {% if rows %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Status</th>
+          <th>Received</th>
+          <th>Topic</th>
+          <th>Key</th>
+          <th>Error</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td><a href="/messages/{{ row.id }}">{{ row.id }}</a></td>
+            <td><span class="badge {{ row.status }}">{{ row.status }}</span></td>
+            <td style="white-space:nowrap;font-size:12px">{{ row.received_at }}</td>
+            <td>{{ row.source_topic }}</td>
+            <td class="key">{{ row.message_key }}</td>
+            <td class="err">{{ row.error_type }} — {{ row.error_message }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty">No DLQ messages{% if status_filter != 'all' %} with status "{{ status_filter }}"{% endif %}</div>
+  {% endif %}
+</body>
+</html>
