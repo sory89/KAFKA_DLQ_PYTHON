@@ -56,3 +56,5 @@ git clone https://github.com/your-repo/KAFKA_DLQ_PYTHON.git
 cd KAFKA_DLQ_PYTHON
 docker compose up -d
 
+<img width="943" height="472" alt="image" src="https://github.com/user-attachments/assets/d1479111-6927-46a4-83f0-e8e9391bc03d" />
+
