@@ -2,8 +2,6 @@
 
 > Inspect, manage and replay Kafka Dead Letter Queue (DLQ) messages with a FastAPI web interface.
 
-![Architecture](https://github.com/user-attachments/assets/f5fed0b0-37fc-4b47-b637-4bcacbb32e4e)
-
 ---
 
 ## 🧠 Overview
